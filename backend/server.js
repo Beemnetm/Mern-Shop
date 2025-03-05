@@ -1,7 +1,8 @@
 import express from "express";
-import Product from "./models/product.model.js";
+
 import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
+import productRoutes from "./routes/product.route.js";
 
 // Load environment variables
 dotenv.config();
@@ -9,32 +10,10 @@ dotenv.config();
 // Initialize the Express app
 const app = express();
 app.use(express.json());
-
+app.use("/api/products", productRoutes);
 // MongoDB connection before starting the server
 connectDB();
 
-// Product creation route
-app.post("/api/products", async (req, res) => {
-    const product = req.body;
-
-    // Validation check
-    if (!product.name || !product.price || !product.image) {
-        return res.status(400).json({ success: false, message: "Please provide all fields" });
-    }
-
-    // Create new product instance
-    const newProduct = new Product(product);
-
-    try {
-        // Save new product to database
-        await newProduct.save();
-        // Send response on successful creation
-        res.status(201).json({ success: true, message: "Product created", product: newProduct });
-    } catch (error) {
-        console.error("Error in creating product:", error.message);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
-});
 
 // Start server
 const PORT = process.env.PORT || 5000;
